@@ -1,0 +1,94 @@
+# FieldKit AI inference container for Jetson Orin Nano
+# Pre-built CUDA libraries from NVIDIA + custom OpenCV/CTranslate2
+#
+# Build on the Jetson itself (not cross-compiled):
+#   docker build -t fieldkit-ai -f Dockerfile.fieldkit-ai .
+#
+# Run:
+#   docker run --rm -it --runtime nvidia --network host \
+#     --device /dev/video0 \
+#     -v /var/roothome/fieldkit:/app \
+#     fieldkit-ai
+
+FROM nvcr.io/nvidia/l4t-jetpack:r36.4.0
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV CUDA_ARCH_BIN=8.7
+
+# ── System dependencies ──────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential cmake ninja-build git curl wget unzip \
+    python3-dev python3-pip python3-numpy python3-venv \
+    libprotobuf-dev protobuf-compiler \
+    libgtk2.0-dev pkg-config \
+    libavcodec-dev libavformat-dev libswscale-dev \
+    libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+    libtbb-dev libjpeg-dev libpng-dev libtiff-dev \
+    libv4l-dev v4l-utils \
+    libopenblas-dev libportaudio2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── PyTorch (NVIDIA pre-built wheel for Jetson) ─────────────────────
+RUN pip3 install --no-cache-dir "numpy<2" && \
+    wget -q https://developer.download.nvidia.cn/compute/redist/jp/v61/pytorch/torch-2.5.0a0+872d972e41.nv24.08.17622132-cp310-cp310-linux_aarch64.whl && \
+    pip3 install --no-cache-dir torch-2.5.0a0+872d972e41.nv24.08.17622132-cp310-cp310-linux_aarch64.whl && \
+    rm torch-*.whl
+
+# ── OpenCV with CUDA ────────────────────────────────────────────────
+RUN cd /tmp && \
+    curl -L https://github.com/opencv/opencv/archive/4.12.0.zip -o opencv.zip && \
+    curl -L https://github.com/opencv/opencv_contrib/archive/4.12.0.zip -o opencv_contrib.zip && \
+    unzip -q opencv.zip && unzip -q opencv_contrib.zip && \
+    rm opencv.zip opencv_contrib.zip && \
+    cd opencv-4.12.0 && mkdir build && cd build && \
+    cmake \
+      -DWITH_CUDA=ON \
+      -DOPENCV_DNN_CUDA=ON \
+      -DWITH_CUDNN=ON \
+      -DCUDA_ARCH_BIN="${CUDA_ARCH_BIN}" \
+      -DCUDA_ARCH_PTX="" \
+      -DOPENCV_GENERATE_PKGCONFIG=ON \
+      -DOPENCV_EXTRA_MODULES_PATH=/tmp/opencv_contrib-4.12.0/modules \
+      -DWITH_GSTREAMER=ON \
+      -DWITH_LIBV4L=ON \
+      -DBUILD_opencv_python3=ON \
+      -DBUILD_TESTS=OFF \
+      -DBUILD_PERF_TESTS=OFF \
+      -DBUILD_EXAMPLES=OFF \
+      -DCMAKE_BUILD_TYPE=RELEASE \
+      -DCMAKE_INSTALL_PREFIX=/usr/local \
+      .. && \
+    make -j$(nproc) && make install && \
+    rm -rf /tmp/opencv* && \
+    ldconfig
+
+# ── CTranslate2 with CUDA ──────────────────────────────────────────
+RUN cd /tmp && \
+    git clone --recursive https://github.com/OpenNMT/CTranslate2.git && \
+    cd CTranslate2 && mkdir build && cd build && \
+    cmake .. \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DWITH_CUDA=ON \
+      -DWITH_CUDNN=ON \
+      -DWITH_MKL=OFF \
+      -DOPENMP_RUNTIME=COMP \
+      -DCMAKE_CUDA_ARCHITECTURES=87 \
+      -DCMAKE_INSTALL_PREFIX=/usr/local && \
+    make -j$(nproc) && make install && ldconfig && \
+    cd ../python && \
+    pip3 install -r install_requirements.txt && \
+    python3 setup.py bdist_wheel && \
+    pip3 install dist/ctranslate2*.whl && \
+    rm -rf /tmp/CTranslate2
+
+# ── Verify ──────────────────────────────────────────────────────────
+RUN python3 -c "\
+import torch; print(f'PyTorch {torch.__version__}, CUDA: {torch.cuda.is_available()}'); \
+import cv2; print(f'OpenCV {cv2.__version__}, CUDA: {cv2.cuda.getCudaEnabledDeviceCount() > 0}'); \
+import ctranslate2; print(f'CTranslate2 OK')"
+
+ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages:$PYTHONPATH
+
+WORKDIR /app
+CMD ["bash"]

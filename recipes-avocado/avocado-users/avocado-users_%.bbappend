@@ -24,6 +24,23 @@ do_install:append() {
     grep -q '^avahi:' ${D}${sysconfdir}/group || \
         echo 'avahi:x:75:' >> ${D}${sysconfdir}/group
 
+    # Add weston user for display compositor
+    grep -q '^weston:' ${D}${sysconfdir}/passwd || \
+        echo 'weston:x:76:76:weston:/home/weston:/bin/sh' >> ${D}${sysconfdir}/passwd
+    grep -q '^weston:' ${D}${sysconfdir}/group || \
+        echo 'weston:x:76:' >> ${D}${sysconfdir}/group
+    grep -q '^wayland:' ${D}${sysconfdir}/group || \
+        echo 'wayland:x:77:weston' >> ${D}${sysconfdir}/group
+    grep -q '^render:' ${D}${sysconfdir}/group || \
+        echo 'render:x:78:weston' >> ${D}${sysconfdir}/group
+    # Add weston to video and input groups
+    sed -i '/^video:/s/$/ weston/' ${D}${sysconfdir}/group 2>/dev/null || \
+        echo 'video:x:44:weston' >> ${D}${sysconfdir}/group
+    sed -i '/^input:/s/$/ weston/' ${D}${sysconfdir}/group 2>/dev/null || \
+        echo 'input:x:79:weston' >> ${D}${sysconfdir}/group
+
+    install -d -m 0755 ${D}/home/weston
+
     # Move root home to writable /var partition
     sed -i 's|^root:x:0:0:root:/root:|root:x:0:0:root:/var/roothome:|' ${D}${sysconfdir}/passwd
 
@@ -32,9 +49,6 @@ do_install:append() {
 
     # Root home directory (on writable /var)
     install -d -m 0700 ${D}/var/roothome
-
-    # /var/log for lastlog
-    install -d -m 0755 ${D}/var/log
 
     # Dev mode: set root password (default: fieldkit123)
     if [ "${FIELDKIT_DEV}" = "1" ]; then
