@@ -19,6 +19,7 @@ local_conf_header:
       packagegroup-fieldkit-camera \
       packagegroup-fieldkit-display \
       packagegroup-fieldkit-container \
+      packagegroup-fieldkit-python \
     "
 
   fieldkit-dev: |
