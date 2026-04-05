@@ -26,7 +26,7 @@ do_install:append() {
 
     # Add weston user for display compositor
     grep -q '^weston:' ${D}${sysconfdir}/passwd || \
-        echo 'weston:x:76:76:weston:/home/weston:/bin/sh' >> ${D}${sysconfdir}/passwd
+        echo 'weston:x:76:76:weston:/var/roothome:/bin/sh' >> ${D}${sysconfdir}/passwd
     grep -q '^weston:' ${D}${sysconfdir}/group || \
         echo 'weston:x:76:' >> ${D}${sysconfdir}/group
     grep -q '^wayland:' ${D}${sysconfdir}/group || \
@@ -38,8 +38,6 @@ do_install:append() {
         echo 'video:x:44:weston' >> ${D}${sysconfdir}/group
     sed -i '/^input:/s/$/ weston/' ${D}${sysconfdir}/group 2>/dev/null || \
         echo 'input:x:79:weston' >> ${D}${sysconfdir}/group
-
-    install -d -m 0755 ${D}/home/weston
 
     # Move root home to writable /var partition
     sed -i 's|^root:x:0:0:root:/root:|root:x:0:0:root:/var/roothome:|' ${D}${sysconfdir}/passwd
