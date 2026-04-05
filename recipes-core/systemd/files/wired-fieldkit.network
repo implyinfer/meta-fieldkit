@@ -1,0 +1,16 @@
+[Match]
+Type=ether
+Name=!veth*
+KernelCommandLine=!nfsroot
+KernelCommandLine=!ip
+
+[Network]
+DHCP=yes
+# Static fallback: always reachable at this address even if DHCP is slow/absent.
+# Override via FIELDKIT_STATIC_IP in local.conf.
+Address=@FIELDKIT_STATIC_IP@
+
+[DHCP]
+UseMTU=yes
+RouteMetric=10
+ClientIdentifier=mac

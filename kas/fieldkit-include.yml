@@ -1,0 +1,33 @@
+header:
+  version: 16
+
+repos:
+  meta-fieldkit:
+    url: https://github.com/implyinfer/meta-fieldkit.git
+    path: meta-fieldkit
+    branch: main
+    layers:
+      .:
+
+local_conf_header:
+  fieldkit-core: |
+    # FieldKit packages baked into rootfs
+    ROOTFS_IMAGE_EXTRA_INSTALL:append = " \
+      packagegroup-fieldkit-core \
+      packagegroup-fieldkit-nvidia \
+      packagegroup-fieldkit-connectivity \
+      packagegroup-fieldkit-camera \
+      packagegroup-fieldkit-display \
+      packagegroup-fieldkit-container \
+    "
+
+  fieldkit-dev: |
+    # Development mode (set FIELDKIT_DEV = "0" for production)
+    FIELDKIT_DEV ?= "1"
+    ROOTFS_IMAGE_EXTRA_INSTALL:append = "${@ ' packagegroup-fieldkit-devtools' if d.getVar('FIELDKIT_DEV') == '1' else ''}"
+    AVOCADO_DEV_ROOT_LOGIN ?= "${FIELDKIT_DEV}"
+
+  fieldkit-fixes: |
+    # Chromium broken with Python 3.12 — mask until fixed upstream
+    BBMASK += "meta-browser/meta-chromium"
+    RDEPENDS:packagegroup-avocado-extra:remove = "chromium-ozone-wayland"

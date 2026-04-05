@@ -1,0 +1,20 @@
+header:
+  version: 16
+  includes:
+    - repo: meta-avocado
+      file: kas/machine/jetson-orin-nano-devkit.yml
+    - repo: meta-fieldkit
+      file: kas/fieldkit-include.yml
+
+repos:
+  meta-avocado:
+    url: https://github.com/avocado-linux/meta-avocado.git
+    path: meta-avocado
+    branch: scarthgap
+
+  meta-fieldkit:
+    url: https://github.com/implyinfer/meta-fieldkit.git
+    path: meta-fieldkit
+    branch: main
+    layers:
+      .:
