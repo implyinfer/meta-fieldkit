@@ -1,0 +1,37 @@
+[Unit]
+Description=Weston Wayland Compositor
+Documentation=man:weston(1)
+After=systemd-user-sessions.service dbus.socket
+Wants=dbus.socket
+ConditionPathExists=/dev/tty0
+
+[Service]
+Type=notify
+EnvironmentFile=-/etc/default/weston
+ExecStart=/usr/bin/weston --modules=systemd-notify.so
+
+User=weston
+Group=weston
+
+# Use /var/roothome since /home/weston is on read-only rootfs
+WorkingDirectory=/var/roothome
+
+PAMName=weston-autologin
+
+TTYPath=/dev/tty7
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+
+StandardInput=tty-fail
+StandardOutput=journal
+StandardError=journal
+
+UtmpIdentifier=tty7
+UtmpMode=user
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

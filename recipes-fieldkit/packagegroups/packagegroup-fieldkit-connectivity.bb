@@ -1,13 +1,13 @@
-SUMMARY = "FieldKit connectivity kernel modules"
+SUMMARY = "FieldKit connectivity kernel modules and firmware"
 DESCRIPTION = "Kernel modules for Ethernet, WiFi, Bluetooth, NVMe, CAN, USB, \
-audio, and display on NVIDIA Jetson Orin Nano devkit."
+audio, and display on NVIDIA Jetson Orin Nano devkit, plus firmware blobs."
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/Apache-2.0;md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit packagegroup
 
-# Ethernet
+# Ethernet (Realtek r8169 on devkit carrier board)
 RDEPENDS_ETHERNET = " \
     kernel-module-r8169 \
     kernel-module-realtek \
@@ -16,6 +16,8 @@ RDEPENDS_ETHERNET = " \
     kernel-module-stmmac \
     kernel-module-stmmac-platform \
     kernel-module-dwmac-tegra \
+    linux-firmware-rtl8168 \
+    linux-firmware-rtl-nic \
 "
 
 # WiFi (RTL8822CE on Orin Nano devkit)
@@ -27,6 +29,7 @@ RDEPENDS_WIFI = " \
     kernel-module-rtw88-8822c \
     kernel-module-rtw88-8822ce \
     linux-firmware-rtl8822 \
+    wireless-regdb-static \
 "
 
 # Bluetooth
