@@ -1,5 +1,3 @@
-# Disable useradd — avocado user is managed statically by avocado-users
-USERADDEXTENSION = ""
-USERADD_PACKAGES = ""
+# User already exists in avocado-users static passwd — skip dynamic creation
 USERADD_PARAM:${PN} = ""
 GROUPADD_PARAM:${PN} = ""
