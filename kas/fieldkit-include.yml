@@ -20,6 +20,10 @@ local_conf_header:
       packagegroup-fieldkit-display \
       packagegroup-fieldkit-container \
       packagegroup-fieldkit-python \
+      packagegroup-fieldkit-kiosk \
+      packagegroup-fieldkit-hotspot \
+      fieldkit-kiosk \
+      fieldkit-nginx \
     "
 
   fieldkit-dev: |

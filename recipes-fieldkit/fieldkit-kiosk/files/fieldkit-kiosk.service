@@ -1,0 +1,32 @@
+[Unit]
+Description=FieldKit Kiosk Display
+Documentation=https://github.com/implyinfer/meta-fieldkit
+After=network-online.target nginx.service weston.service
+Wants=network-online.target nginx.service
+
+# Wait for display hardware
+ConditionPathExists=/dev/dri/card0
+
+[Service]
+Type=simple
+User=weston
+Environment=XDG_RUNTIME_DIR=/run/user/76
+Environment=WAYLAND_DISPLAY=wayland-0
+
+# Cage launches Cog fullscreen on tty7
+# Cog loads the local nginx dashboard
+ExecStart=/usr/bin/cage -- /usr/bin/cog http://localhost
+
+TTYPath=/dev/tty7
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+StandardInput=tty-fail
+StandardOutput=journal
+StandardError=journal
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

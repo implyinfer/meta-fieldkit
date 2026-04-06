@@ -1,0 +1,13 @@
+[Unit]
+Description=FieldKit WiFi Hotspot
+After=network-online.target NetworkManager.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=-/var/lib/fieldkit/hotspot.conf
+ExecStart=/usr/libexec/fieldkit-hotspot.sh
+
+[Install]
+WantedBy=multi-user.target
