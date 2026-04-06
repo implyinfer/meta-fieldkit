@@ -10,7 +10,6 @@ inherit packagegroup
 # Core Tegra runtime
 RDEPENDS_TEGRA_CORE = " \
     tegra-firmware \
-    tegra-binaries \
     tegra-libraries-core \
     tegra-tools \
     tegra-nvfancontrol \
