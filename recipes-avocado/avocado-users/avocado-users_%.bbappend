@@ -24,6 +24,12 @@ do_install:append() {
     grep -q '^avahi:' ${D}${sysconfdir}/group || \
         echo 'avahi:x:75:' >> ${D}${sysconfdir}/group
 
+    # Add nginx/www user for web server
+    grep -q '^www:' ${D}${sysconfdir}/passwd || \
+        echo 'www:x:80:80:www:/var/www:/sbin/nologin' >> ${D}${sysconfdir}/passwd
+    grep -q '^www-data:' ${D}${sysconfdir}/group || \
+        echo 'www-data:x:80:www' >> ${D}${sysconfdir}/group
+
     # Add weston user for display compositor
     grep -q '^weston:' ${D}${sysconfdir}/passwd || \
         echo 'weston:x:76:76:weston:/var/roothome:/bin/sh' >> ${D}${sysconfdir}/passwd
