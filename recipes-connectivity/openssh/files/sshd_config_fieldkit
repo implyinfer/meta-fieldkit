@@ -13,5 +13,9 @@ PubkeyAuthentication yes
 # Look for authorized_keys on writable /var partition
 AuthorizedKeysFile /var/lib/ssh/authorized_keys/%u .ssh/authorized_keys
 
+# Force HOME to writable /var partition (rootfs is read-only)
+SetEnv HOME=/var/roothome
+PermitUserEnvironment yes
+
 UsePAM yes
 Subsystem sftp /usr/libexec/sftp-server
