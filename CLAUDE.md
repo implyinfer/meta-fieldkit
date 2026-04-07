@@ -2,7 +2,7 @@
 
 ## What is this?
 
-FieldKit OS is a custom Linux distribution for NVIDIA Jetson Orin Nano edge AI devices, built for deploying healthcare inference field kits. It's built on Avocado OS (Yocto/OpenEmbedded) with the `meta-fieldkit` layer providing hardware support, developer experience, and production hardening.
+FieldKit OS is a custom Linux distribution for NVIDIA Jetson Orin Nano edge AI devices, built for deploying physical AI and robotics field kits. It's built on Avocado OS (Yocto/OpenEmbedded) with the `meta-fieldkit` layer providing hardware support, developer experience, and production hardening.
 
 ## Architecture
 
