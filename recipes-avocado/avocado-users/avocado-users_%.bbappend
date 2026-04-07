@@ -45,8 +45,8 @@ do_install:append() {
     sed -i '/^input:/s/$/ weston/' ${D}${sysconfdir}/group 2>/dev/null || \
         echo 'input:x:79:weston' >> ${D}${sysconfdir}/group
 
-    # Move root home to writable /var partition
-    sed -i 's|^root:x:0:0:root:/root:|root:x:0:0:root:/var/roothome:|' ${D}${sysconfdir}/passwd
+    # Move root home to writable /var partition, use bash for proper profile sourcing
+    sed -i 's|^root:x:0:0:root:/root:/bin/sh|root:x:0:0:root:/var/roothome:/bin/bash|' ${D}${sysconfdir}/passwd
 
     # sshd privilege separation directory
     install -d -m 0755 ${D}/var/empty/sshd
